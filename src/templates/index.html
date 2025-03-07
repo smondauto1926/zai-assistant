@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Upload il file Audio</h1>
+    <form id="transcriptionForm" action="/transcribe" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="audio/*" required>
+        <button type="submit">Transcribe</button>
+    </form>
+
+    <div id="loadingIndicator" class="loading">
+        <div class="spinner"></div>
+        <p>Attendi un attimo AMFU. Sto elaborando il tuo report</p>
+    </div>
+
+    <div id="downloadSection" style="display: none;">
+        <h2>Download Generated Summary</h2>
+        <a id="downloadLink" href="" download="summary.docx">
+            <button>Download Word File</button>
+        </a>
+    </div>
+
+    <script>
+        const form = document.getElementById('transcriptionForm');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadLink = document.getElementById('downloadLink');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            loadingIndicator.style.display = 'block';
+            downloadSection.style.display = 'none';
+            
+            const formData = new FormData(this);
+            
+            fetch('/transcribe/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingIndicator.style.display = 'none';
+                if (data.generated_file) {
+                    // Set the download link
+                    downloadLink.href = data.generated_file;
+                    downloadSection.style.display = 'block';
+                    
+                    // Trigger the download automatically
+                    // Create a temporary download link and trigger it
+                    const a = document.createElement('a');
+                    a.href = data.generated_file;
+                    a.download = "summary.docx";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                } else {
+                    throw new Error('No file generated');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadingIndicator.style.display = 'none';
+                alert('An error occurred during transcription');
+            });
+        });
+    </script>
+
+    <style>
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #downloadSection {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</body>
+</html>

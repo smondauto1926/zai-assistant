@@ -1,0 +1,8 @@
+fastapi
+python-multipart
+openai-whisper
+language_tool_python
+openai==0.28
+python-docx
+numpy<2.0
+uvicorn
