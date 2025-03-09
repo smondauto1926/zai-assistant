@@ -110,10 +110,9 @@ def improve_transcript(raw_transcript):
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "generated_file": None})
 
-# c
 @app.post("/transcribe/")
 async def transcribe_audio(request: Request, file: UploadFile = File(...)):
-    # Save the uploaded file temporarily
+    # Salva il file temporaneamente
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
         shutil.copyfileobj(file.file, temp_audio)
         temp_audio_path = temp_audio.name
